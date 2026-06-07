@@ -241,23 +241,24 @@ class TicketView(discord.ui.View):
         super().__init__(timeout=None)
 
     def lock(self):
-        self.disable_all_items()
-        return self
+    for item in self.children:
+        item.disabled = True
+    return self
 
     async def lock_and_update(self, interaction: discord.Interaction):
-        locked_ticket_channels.add(interaction.channel.id)
-        self.lock()
+    locked_ticket_channels.add(interaction.channel.id)
 
-        # FIX: safe + reliable update method
-        await interaction.response.edit_message(view=self)
+    self.lock()
 
+    await interaction.message.edit(view=self)
+    
     @discord.ui.button(label="Make a Deal", style=discord.ButtonStyle.green)
     async def make_deal(self, interaction: discord.Interaction, button):
 
         if interaction.channel.id in locked_ticket_channels:
             return await interaction.response.send_message("Already locked.", ephemeral=True)
 
-        await interaction.response.defer()
+        
 
         await self.lock_and_update(interaction)
 
@@ -269,14 +270,21 @@ class TicketView(discord.ui.View):
 
         await interaction.followup.send(embed=embed, view=BuyerSellerView())
 
-
+    async def on_error(self, interaction, error, item):
+    import traceback
+    traceback.print_exception(
+        type(error),
+        error,
+        error.__traceback__
+    )
+    
     @discord.ui.button(label="Cancel a Deal", style=discord.ButtonStyle.red)
     async def cancel_deal(self, interaction: discord.Interaction, button):
 
         if interaction.channel.id in locked_ticket_channels:
             return await interaction.response.send_message("Already locked.", ephemeral=True)
 
-        await interaction.response.defer()
+        
 
         await self.lock_and_update(interaction)
 
@@ -294,7 +302,7 @@ class TicketView(discord.ui.View):
         if interaction.channel.id in locked_ticket_channels:
             return await interaction.response.send_message("Already locked.", ephemeral=True)
 
-        await interaction.response.defer()
+        
 
         await self.lock_and_update(interaction)
 
@@ -312,7 +320,7 @@ class TicketView(discord.ui.View):
         if interaction.channel.id in locked_ticket_channels:
             return await interaction.response.send_message("Already locked.", ephemeral=True)
 
-        await interaction.response.defer()
+        
 
         await self.lock_and_update(interaction)
 
@@ -383,6 +391,7 @@ class TicketView(discord.ui.View):
 # -------------------------
 @bot.event
 async def on_ready():
+    bot.add_view(TicketView())
     await bot.tree.sync()
     print(f"Logged in as {bot.user}")
 
