@@ -42,6 +42,11 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
+# -------------------------
+# STATE (LOCK SYSTEM)
+# -------------------------
+locked_ticket_channels = set()
+
 
 # -------------------------
 # OWNER CHECK
@@ -184,6 +189,11 @@ class DealModal(discord.ui.Modal, title="Deal Information"):
             )
         )
 
+        embed.add_field(name="Product", value=self.product.value, inline=False)
+        embed.add_field(name="Price", value=self.price.value, inline=False)
+        embed.add_field(name="Deal Partner", value=self.partner.value, inline=False)
+        embed.add_field(name="Payment Method", value=self.payment.value, inline=False)
+
         await interaction.response.send_message(embed=embed)
 
 
@@ -205,7 +215,10 @@ class GenericModal(discord.ui.Modal):
     async def on_submit(self, interaction: discord.Interaction):
 
         embed = discord.Embed(
-            description=self.final_message,
+            description=(
+                f"{self.final_message}\n\n"
+                f"**User Input:**\n{self.input.value}"
+            ),
             color=discord.Color.blurple()
         )
 
@@ -234,8 +247,22 @@ class TicketView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 
+    def lock_view(self, interaction: discord.Interaction):
+        """Disable all buttons and lock channel"""
+        self.disable_all_items()
+        locked_ticket_channels.add(interaction.channel.id)
+        return self
+
     @discord.ui.button(label="Make a Deal", style=discord.ButtonStyle.green)
     async def make_deal(self, interaction: discord.Interaction, button):
+
+        if interaction.channel.id in locked_ticket_channels:
+            return await interaction.response.send_message(
+                "This ticket option is already locked.",
+                ephemeral=True
+            )
+
+        self.lock_view(interaction)
 
         embed = discord.Embed(
             title="Make a Deal",
@@ -243,10 +270,21 @@ class TicketView(discord.ui.View):
             color=discord.Color.green()
         )
 
+        await interaction.message.edit(view=self)
+
         await interaction.response.send_message(embed=embed, view=BuyerSellerView())
 
     @discord.ui.button(label="Cancel a Deal", style=discord.ButtonStyle.red)
     async def cancel_deal(self, interaction: discord.Interaction, button):
+
+        if interaction.channel.id in locked_ticket_channels:
+            return await interaction.response.send_message(
+                "This ticket option is already locked.",
+                ephemeral=True
+            )
+
+        self.lock_view(interaction)
+        await interaction.message.edit(view=self)
 
         await interaction.response.send_modal(
             GenericModal(
@@ -259,6 +297,15 @@ class TicketView(discord.ui.View):
     @discord.ui.button(label="Report a Scammer", style=discord.ButtonStyle.red)
     async def report_scammer(self, interaction: discord.Interaction, button):
 
+        if interaction.channel.id in locked_ticket_channels:
+            return await interaction.response.send_message(
+                "This ticket option is already locked.",
+                ephemeral=True
+            )
+
+        self.lock_view(interaction)
+        await interaction.message.edit(view=self)
+
         await interaction.response.send_modal(
             GenericModal(
                 "Report Scammer",
@@ -269,6 +316,15 @@ class TicketView(discord.ui.View):
 
     @discord.ui.button(label="Report a Problem", style=discord.ButtonStyle.blurple)
     async def report_problem(self, interaction: discord.Interaction, button):
+
+        if interaction.channel.id in locked_ticket_channels:
+            return await interaction.response.send_message(
+                "This ticket option is already locked.",
+                ephemeral=True
+            )
+
+        self.lock_view(interaction)
+        await interaction.message.edit(view=self)
 
         await interaction.response.send_modal(
             GenericModal(
@@ -281,6 +337,15 @@ class TicketView(discord.ui.View):
     @discord.ui.button(label="Make a Refund", style=discord.ButtonStyle.gray)
     async def refund(self, interaction: discord.Interaction, button):
 
+        if interaction.channel.id in locked_ticket_channels:
+            return await interaction.response.send_message(
+                "This ticket option is already locked.",
+                ephemeral=True
+            )
+
+        self.lock_view(interaction)
+        await interaction.message.edit(view=self)
+
         await interaction.response.send_modal(
             GenericModal(
                 "Refund Request",
@@ -292,6 +357,15 @@ class TicketView(discord.ui.View):
     @discord.ui.button(label="Partner With Us", style=discord.ButtonStyle.green)
     async def partner(self, interaction: discord.Interaction, button):
 
+        if interaction.channel.id in locked_ticket_channels:
+            return await interaction.response.send_message(
+                "This ticket option is already locked.",
+                ephemeral=True
+            )
+
+        self.lock_view(interaction)
+        await interaction.message.edit(view=self)
+
         await interaction.response.send_modal(
             GenericModal(
                 "Partnership Request",
@@ -302,6 +376,15 @@ class TicketView(discord.ui.View):
 
     @discord.ui.button(label="Something Else", style=discord.ButtonStyle.gray)
     async def something_else(self, interaction: discord.Interaction, button):
+
+        if interaction.channel.id in locked_ticket_channels:
+            return await interaction.response.send_message(
+                "This ticket option is already locked.",
+                ephemeral=True
+            )
+
+        self.lock_view(interaction)
+        await interaction.message.edit(view=self)
 
         await interaction.response.send_modal(
             GenericModal(
