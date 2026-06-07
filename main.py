@@ -248,8 +248,8 @@ class TicketView(discord.ui.View):
         locked_ticket_channels.add(interaction.channel.id)
         self.lock()
 
-        # ✅ FIX: safe interaction update
-        await interaction.edit_original_response(view=self)
+        # FIX: safe + reliable update method
+        await interaction.response.edit_message(view=self)
 
     @discord.ui.button(label="Make a Deal", style=discord.ButtonStyle.green)
     async def make_deal(self, interaction: discord.Interaction, button):
@@ -379,11 +379,10 @@ class TicketView(discord.ui.View):
 
 
 # -------------------------
-# REGISTER PERSISTENT VIEW
+# REGISTER VIEW (FIXED)
 # -------------------------
 @bot.event
 async def on_ready():
-    bot.add_view(TicketView())
     await bot.tree.sync()
     print(f"Logged in as {bot.user}")
 
