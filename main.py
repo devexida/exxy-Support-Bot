@@ -233,7 +233,7 @@ class BuyerSellerView(discord.ui.View):
 
 
 # -------------------------
-# TICKET VIEW (FIXED)
+# TICKET VIEW (FIXED ONLY)
 # -------------------------
 class TicketView(discord.ui.View):
 
@@ -247,7 +247,9 @@ class TicketView(discord.ui.View):
     async def lock_and_update(self, interaction: discord.Interaction):
         locked_ticket_channels.add(interaction.channel.id)
         self.lock()
-        await interaction.message.edit(view=self)
+
+        # ✅ FIX: safe interaction update
+        await interaction.edit_original_response(view=self)
 
     @discord.ui.button(label="Make a Deal", style=discord.ButtonStyle.green)
     async def make_deal(self, interaction: discord.Interaction, button):
@@ -377,7 +379,7 @@ class TicketView(discord.ui.View):
 
 
 # -------------------------
-# REGISTER PERSISTENT VIEW (FIXED)
+# REGISTER PERSISTENT VIEW
 # -------------------------
 @bot.event
 async def on_ready():
