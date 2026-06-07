@@ -233,7 +233,7 @@ class BuyerSellerView(discord.ui.View):
 
 
 # -------------------------
-# TICKET VIEW
+# TICKET VIEW (FIXED)
 # -------------------------
 class TicketView(discord.ui.View):
 
@@ -244,6 +244,11 @@ class TicketView(discord.ui.View):
         self.disable_all_items()
         return self
 
+    async def lock_and_update(self, interaction: discord.Interaction):
+        locked_ticket_channels.add(interaction.channel.id)
+        self.lock()
+        await interaction.message.edit(view=self)
+
     @discord.ui.button(label="Make a Deal", style=discord.ButtonStyle.green)
     async def make_deal(self, interaction: discord.Interaction, button):
 
@@ -252,10 +257,7 @@ class TicketView(discord.ui.View):
 
         await interaction.response.defer()
 
-        locked_ticket_channels.add(interaction.channel.id)
-        self.lock()
-
-        await interaction.message.edit(view=self)
+        await self.lock_and_update(interaction)
 
         embed = discord.Embed(
             title="Make a Deal",
@@ -265,6 +267,7 @@ class TicketView(discord.ui.View):
 
         await interaction.followup.send(embed=embed, view=BuyerSellerView())
 
+
     @discord.ui.button(label="Cancel a Deal", style=discord.ButtonStyle.red)
     async def cancel_deal(self, interaction: discord.Interaction, button):
 
@@ -273,10 +276,7 @@ class TicketView(discord.ui.View):
 
         await interaction.response.defer()
 
-        locked_ticket_channels.add(interaction.channel.id)
-        self.lock()
-
-        await interaction.message.edit(view=self)
+        await self.lock_and_update(interaction)
 
         await interaction.followup.send(
             embed=discord.Embed(
@@ -294,10 +294,7 @@ class TicketView(discord.ui.View):
 
         await interaction.response.defer()
 
-        locked_ticket_channels.add(interaction.channel.id)
-        self.lock()
-
-        await interaction.message.edit(view=self)
+        await self.lock_and_update(interaction)
 
         await interaction.followup.send(
             embed=discord.Embed(
@@ -315,10 +312,7 @@ class TicketView(discord.ui.View):
 
         await interaction.response.defer()
 
-        locked_ticket_channels.add(interaction.channel.id)
-        self.lock()
-
-        await interaction.message.edit(view=self)
+        await self.lock_and_update(interaction)
 
         await interaction.followup.send(
             embed=discord.Embed(
@@ -336,10 +330,7 @@ class TicketView(discord.ui.View):
 
         await interaction.response.defer()
 
-        locked_ticket_channels.add(interaction.channel.id)
-        self.lock()
-
-        await interaction.message.edit(view=self)
+        await self.lock_and_update(interaction)
 
         await interaction.followup.send(
             embed=discord.Embed(
@@ -357,10 +348,7 @@ class TicketView(discord.ui.View):
 
         await interaction.response.defer()
 
-        locked_ticket_channels.add(interaction.channel.id)
-        self.lock()
-
-        await interaction.message.edit(view=self)
+        await self.lock_and_update(interaction)
 
         await interaction.followup.send(
             embed=discord.Embed(
@@ -378,10 +366,7 @@ class TicketView(discord.ui.View):
 
         await interaction.response.defer()
 
-        locked_ticket_channels.add(interaction.channel.id)
-        self.lock()
-
-        await interaction.message.edit(view=self)
+        await self.lock_and_update(interaction)
 
         await interaction.followup.send(
             embed=discord.Embed(
@@ -392,7 +377,7 @@ class TicketView(discord.ui.View):
 
 
 # -------------------------
-# REGISTER PERSISTENT VIEW (IMPORTANT FIX)
+# REGISTER PERSISTENT VIEW (FIXED)
 # -------------------------
 @bot.event
 async def on_ready():
