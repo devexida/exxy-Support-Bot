@@ -3,9 +3,17 @@ from discord.ext import commands
 from discord import app_commands
 from dotenv import load_dotenv
 import os
+from flask import Flask
+from threading import Thread
 
 load_dotenv()
 
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Bot is online!"
+    
 TOKEN = os.getenv("TOKEN")
 
 OWNER_ROLE_ID = int(os.getenv("OWNER_ROLE_ID"))
@@ -22,7 +30,9 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 # -------------------------
 # OWNER CHECK
 # -------------------------
-
+def run_web():
+    app.run(host="0.0.0.0", port=10000)
+    
 def owner_check(interaction: discord.Interaction):
     return any(role.id == OWNER_ROLE_ID for role in interaction.user.roles)
 
@@ -359,5 +369,7 @@ async def on_ready():
 
     print(f"Logged in as {bot.user}")
 
+web_thread = Thread(target=run_web)
+web_thread.start()
 
 bot.run(TOKEN)
