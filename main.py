@@ -241,24 +241,32 @@ class TicketView(discord.ui.View):
         super().__init__(timeout=None)
 
     def lock(self):
-    for item in self.children:
-        item.disabled = True
-    return self
+        for item in self.children:
+            item.disabled = True
+        return self
 
     async def lock_and_update(self, interaction: discord.Interaction):
-    locked_ticket_channels.add(interaction.channel.id)
+        locked_ticket_channels.add(interaction.channel.id)
 
-    self.lock()
+        self.lock()
 
-    await interaction.message.edit(view=self)
-    
-    @discord.ui.button(label="Make a Deal", style=discord.ButtonStyle.green)
-    async def make_deal(self, interaction: discord.Interaction, button):
+        await interaction.message.edit(view=self)
+
+    @discord.ui.button(
+        label="Make a Deal",
+        style=discord.ButtonStyle.green
+    )
+    async def make_deal(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
 
         if interaction.channel.id in locked_ticket_channels:
-            return await interaction.response.send_message("Already locked.", ephemeral=True)
-
-        
+            return await interaction.response.send_message(
+                "Already locked.",
+                ephemeral=True
+            )
 
         await self.lock_and_update(interaction)
 
@@ -268,7 +276,13 @@ class TicketView(discord.ui.View):
             color=discord.Color.green()
         )
 
-        await interaction.followup.send(embed=embed, view=BuyerSellerView())
+        await interaction.channel.send(
+            embed=embed,
+            view=BuyerSellerView()
+        )
+        
+
+
 
     async def on_error(self, interaction, error, item):
     import traceback
