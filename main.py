@@ -42,9 +42,6 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# -------------------------
-# STATE (LOCK SYSTEM)
-# -------------------------
 locked_ticket_channels = set()
 
 
@@ -184,8 +181,7 @@ class DealModal(discord.ui.Modal, title="Deal Information"):
             color=discord.Color.green(),
             description=(
                 "Thank you for your information.\n\n"
-                "A staff member will be with you shortly "
-                "to support your deal as a middle man."
+                "A staff member will be with you shortly."
             )
         )
 
@@ -215,10 +211,7 @@ class GenericModal(discord.ui.Modal):
     async def on_submit(self, interaction: discord.Interaction):
 
         embed = discord.Embed(
-            description=(
-                f"{self.final_message}\n\n"
-                f"**User Input:**\n{self.input.value}"
-            ),
+            description=f"{self.final_message}\n\n**User Input:**\n{self.input.value}",
             color=discord.Color.blurple()
         )
 
@@ -247,22 +240,22 @@ class TicketView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 
-    def lock_view(self, interaction: discord.Interaction):
-        """Disable all buttons and lock channel"""
+    def lock(self):
         self.disable_all_items()
-        locked_ticket_channels.add(interaction.channel.id)
         return self
 
     @discord.ui.button(label="Make a Deal", style=discord.ButtonStyle.green)
     async def make_deal(self, interaction: discord.Interaction, button):
 
         if interaction.channel.id in locked_ticket_channels:
-            return await interaction.response.send_message(
-                "This ticket option is already locked.",
-                ephemeral=True
-            )
+            return await interaction.response.send_message("Already locked.", ephemeral=True)
 
-        self.lock_view(interaction)
+        await interaction.response.defer()
+
+        locked_ticket_channels.add(interaction.channel.id)
+        self.lock()
+
+        await interaction.message.edit(view=self)
 
         embed = discord.Embed(
             title="Make a Deal",
@@ -270,129 +263,142 @@ class TicketView(discord.ui.View):
             color=discord.Color.green()
         )
 
-        await interaction.message.edit(view=self)
-
-        await interaction.response.send_message(embed=embed, view=BuyerSellerView())
+        await interaction.followup.send(embed=embed, view=BuyerSellerView())
 
     @discord.ui.button(label="Cancel a Deal", style=discord.ButtonStyle.red)
     async def cancel_deal(self, interaction: discord.Interaction, button):
 
         if interaction.channel.id in locked_ticket_channels:
-            return await interaction.response.send_message(
-                "This ticket option is already locked.",
-                ephemeral=True
-            )
+            return await interaction.response.send_message("Already locked.", ephemeral=True)
 
-        self.lock_view(interaction)
+        await interaction.response.defer()
+
+        locked_ticket_channels.add(interaction.channel.id)
+        self.lock()
+
         await interaction.message.edit(view=self)
 
-        await interaction.response.send_modal(
-            GenericModal(
-                "Cancel Deal",
-                "Describe the deal you want to cancel",
-                "A staff member will be with you shortly to assist you."
+        await interaction.followup.send(
+            embed=discord.Embed(
+                description="A staff member will help you shortly.",
+                color=discord.Color.blurple()
             )
         )
+
 
     @discord.ui.button(label="Report a Scammer", style=discord.ButtonStyle.red)
     async def report_scammer(self, interaction: discord.Interaction, button):
 
         if interaction.channel.id in locked_ticket_channels:
-            return await interaction.response.send_message(
-                "This ticket option is already locked.",
-                ephemeral=True
-            )
+            return await interaction.response.send_message("Already locked.", ephemeral=True)
 
-        self.lock_view(interaction)
+        await interaction.response.defer()
+
+        locked_ticket_channels.add(interaction.channel.id)
+        self.lock()
+
         await interaction.message.edit(view=self)
 
-        await interaction.response.send_modal(
-            GenericModal(
-                "Report Scammer",
-                "Username and User ID",
-                "Please provide more information and screenshots. Staff will be with you shortly."
+        await interaction.followup.send(
+            embed=discord.Embed(
+                description="Please provide more info and screenshots.",
+                color=discord.Color.blurple()
             )
         )
+
 
     @discord.ui.button(label="Report a Problem", style=discord.ButtonStyle.blurple)
     async def report_problem(self, interaction: discord.Interaction, button):
 
         if interaction.channel.id in locked_ticket_channels:
-            return await interaction.response.send_message(
-                "This ticket option is already locked.",
-                ephemeral=True
-            )
+            return await interaction.response.send_message("Already locked.", ephemeral=True)
 
-        self.lock_view(interaction)
+        await interaction.response.defer()
+
+        locked_ticket_channels.add(interaction.channel.id)
+        self.lock()
+
         await interaction.message.edit(view=self)
 
-        await interaction.response.send_modal(
-            GenericModal(
-                "Problem Report",
-                "Describe the problem",
-                "Staff will be with you shortly to resolve the problem."
+        await interaction.followup.send(
+            embed=discord.Embed(
+                description="Staff will assist you shortly.",
+                color=discord.Color.blurple()
             )
         )
+
 
     @discord.ui.button(label="Make a Refund", style=discord.ButtonStyle.gray)
     async def refund(self, interaction: discord.Interaction, button):
 
         if interaction.channel.id in locked_ticket_channels:
-            return await interaction.response.send_message(
-                "This ticket option is already locked.",
-                ephemeral=True
-            )
+            return await interaction.response.send_message("Already locked.", ephemeral=True)
 
-        self.lock_view(interaction)
+        await interaction.response.defer()
+
+        locked_ticket_channels.add(interaction.channel.id)
+        self.lock()
+
         await interaction.message.edit(view=self)
 
-        await interaction.response.send_modal(
-            GenericModal(
-                "Refund Request",
-                "Deal Information",
-                "Please provide deal information, payment methods, seller/buyer names and middle man names. Staff will be with you shortly."
+        await interaction.followup.send(
+            embed=discord.Embed(
+                description="Provide all deal details for refund review.",
+                color=discord.Color.blurple()
             )
         )
+
 
     @discord.ui.button(label="Partner With Us", style=discord.ButtonStyle.green)
     async def partner(self, interaction: discord.Interaction, button):
 
         if interaction.channel.id in locked_ticket_channels:
-            return await interaction.response.send_message(
-                "This ticket option is already locked.",
-                ephemeral=True
-            )
+            return await interaction.response.send_message("Already locked.", ephemeral=True)
 
-        self.lock_view(interaction)
+        await interaction.response.defer()
+
+        locked_ticket_channels.add(interaction.channel.id)
+        self.lock()
+
         await interaction.message.edit(view=self)
 
-        await interaction.response.send_modal(
-            GenericModal(
-                "Partnership Request",
-                "Social Media Link",
-                "A staff member will review it shortly and let you know if we are interested."
+        await interaction.followup.send(
+            embed=discord.Embed(
+                description="We will review your partnership request.",
+                color=discord.Color.blurple()
             )
         )
+
 
     @discord.ui.button(label="Something Else", style=discord.ButtonStyle.gray)
     async def something_else(self, interaction: discord.Interaction, button):
 
         if interaction.channel.id in locked_ticket_channels:
-            return await interaction.response.send_message(
-                "This ticket option is already locked.",
-                ephemeral=True
-            )
+            return await interaction.response.send_message("Already locked.", ephemeral=True)
 
-        self.lock_view(interaction)
+        await interaction.response.defer()
+
+        locked_ticket_channels.add(interaction.channel.id)
+        self.lock()
+
         await interaction.message.edit(view=self)
 
-        await interaction.response.send_modal(
-            GenericModal(
-                "Something Else",
-                "Leave a message",
-                "A staff member will be with you shortly."
+        await interaction.followup.send(
+            embed=discord.Embed(
+                description="Staff will be with you shortly.",
+                color=discord.Color.blurple()
             )
         )
+
+
+# -------------------------
+# REGISTER PERSISTENT VIEW (IMPORTANT FIX)
+# -------------------------
+@bot.event
+async def on_ready():
+    bot.add_view(TicketView())
+    await bot.tree.sync()
+    print(f"Logged in as {bot.user}")
 
 
 # -------------------------
@@ -407,23 +413,11 @@ async def on_guild_channel_create(channel):
 
             embed = discord.Embed(
                 title="Welcome",
-                description=(
-                    "Thanks for choosing **eXXy Services**.\n\n"
-                    "How can we assist you today?"
-                ),
+                description="Thanks for choosing **eXXy Services**.\n\nHow can we assist you today?",
                 color=discord.Color.blurple()
             )
 
             await channel.send(embed=embed, view=TicketView())
-
-
-# -------------------------
-# READY
-# -------------------------
-@bot.event
-async def on_ready():
-    await bot.tree.sync()
-    print(f"Logged in as {bot.user}")
 
 
 # -------------------------
