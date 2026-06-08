@@ -6,6 +6,7 @@ import os
 from flask import Flask
 from threading import Thread
 from typing import Optional
+import asyncio
 
 load_dotenv()
 
@@ -30,6 +31,9 @@ TOKEN = os.getenv("TOKEN")
 OWNER_ROLE_ID = int(os.getenv("OWNER_ROLE_ID"))
 DEAL_LOGS_CHANNEL_ID = int(os.getenv("DEAL_LOGS_CHANNEL_ID"))
 TICKETS_CATEGORY_ID = int(os.getenv("TICKETS_CATEGORY_ID"))
+
+# Banner image URL (update this with your GitHub raw link)
+BANNER_URL = "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/banner.png"  # ← CHANGE THIS
 
 
 # -------------------------
@@ -58,7 +62,6 @@ def owner_check(interaction: discord.Interaction):
 class ChannelButton(discord.ui.View):
     def __init__(self, button_text, channel: discord.TextChannel):
         super().__init__(timeout=None)
-
         self.add_item(
             discord.ui.Button(
                 label=button_text,
@@ -95,6 +98,7 @@ async def panel(
         description=text,
         color=discord.Color.blurple()
     )
+    embed.set_image(url=BANNER_URL)  # Banner at top
 
     if button and channel and button_text:
         view = discord.ui.View()
@@ -146,6 +150,7 @@ async def deal_log(
         title="An order has been finished ✅",
         color=discord.Color.green()
     )
+    embed.set_image(url=BANNER_URL)  # Banner
 
     embed.add_field(name="Seller", value=seller_name, inline=False)
     embed.add_field(name="Buyer", value=buyer_name, inline=False)
@@ -184,6 +189,7 @@ class DealModal(discord.ui.Modal, title="Deal Information"):
                 "A staff member will be with you shortly."
             )
         )
+        embed.set_image(url=BANNER_URL)
 
         embed.add_field(name="Product", value=self.product.value, inline=False)
         embed.add_field(name="Price", value=self.price.value, inline=False)
@@ -197,7 +203,6 @@ class GenericModal(discord.ui.Modal):
 
     def __init__(self, title_text, field_label, final_message):
         super().__init__(title=title_text)
-
         self.final_message = final_message
 
         self.input = discord.ui.TextInput(
@@ -205,16 +210,14 @@ class GenericModal(discord.ui.Modal):
             style=discord.TextStyle.paragraph,
             required=True
         )
-
         self.add_item(self.input)
 
     async def on_submit(self, interaction: discord.Interaction):
-
         embed = discord.Embed(
             description=f"{self.final_message}\n\n**User Input:**\n{self.input.value}",
             color=discord.Color.blurple()
         )
-
+        embed.set_image(url=BANNER_URL)
         await interaction.response.send_message(embed=embed)
 
 
@@ -233,179 +236,108 @@ class BuyerSellerView(discord.ui.View):
 
 
 # -------------------------
-# TICKET VIEW (FIXED ONLY)
+# IMPROVED TICKET OPTIONS - Using Select Menu
 # -------------------------
+class TicketSelect(discord.ui.Select):
+    def __init__(self):
+        options = [
+            discord.SelectOption(label="Make a Deal", value="make_deal", emoji="🤝", description="Start a new deal"),
+            discord.SelectOption(label="Cancel a Deal", value="cancel_deal", emoji="❌", description="Cancel an existing deal"),
+            discord.SelectOption(label="Report a Scammer", value="report_scammer", emoji="🚨", description="Report fraud"),
+            discord.SelectOption(label="Report a Problem", value="report_problem", emoji="⚠️", description="Technical issue"),
+            discord.SelectOption(label="Make a Refund", value="refund", emoji="💰", description="Request refund"),
+            discord.SelectOption(label="Partner With Us", value="partner", emoji="👥", description="Business partnership"),
+            discord.SelectOption(label="Something Else", value="something_else", emoji="❓", description="Other inquiry"),
+        ]
+        super().__init__(placeholder="Select an option...", min_values=1, max_values=1, options=options)
+
+    async def callback(self, interaction: discord.Interaction):
+        if interaction.channel.id in locked_ticket_channels:
+            return await interaction.response.send_message("This ticket has already been handled.", ephemeral=True)
+
+        value = self.values[0]
+
+        # Lock the ticket
+        locked_ticket_channels.add(interaction.channel.id)
+        # Disable select
+        self.disabled = True
+        for item in self.view.children:
+            item.disabled = True
+
+        await interaction.response.edit_message(view=self.view)
+
+        await asyncio.sleep(0.5)  # Small delay for smooth UX
+
+        if value == "make_deal":
+            embed = discord.Embed(
+                title="Make a Deal",
+                description="Are you a...",
+                color=discord.Color.green()
+            )
+            embed.set_image(url=BANNER_URL)
+            await interaction.followup.send(embed=embed, view=BuyerSellerView())
+
+        elif value == "cancel_deal":
+            embed = discord.Embed(
+                description="A staff member will help you shortly with your cancellation.",
+                color=discord.Color.blurple()
+            )
+            embed.set_image(url=BANNER_URL)
+            await interaction.followup.send(embed=embed)
+
+        elif value == "report_scammer":
+            embed = discord.Embed(
+                description="Please provide more info and screenshots.\nStaff will review shortly.",
+                color=discord.Color.red()
+            )
+            embed.set_image(url=BANNER_URL)
+            await interaction.followup.send(embed=embed)
+
+        elif value == "report_problem":
+            embed = discord.Embed(
+                description="Staff will assist you shortly with your issue.",
+                color=discord.Color.blurple()
+            )
+            embed.set_image(url=BANNER_URL)
+            await interaction.followup.send(embed=embed)
+
+        elif value == "refund":
+            embed = discord.Embed(
+                description="Provide all deal details for refund review.",
+                color=discord.Color.blurple()
+            )
+            embed.set_image(url=BANNER_URL)
+            await interaction.followup.send(embed=embed)
+
+        elif value == "partner":
+            embed = discord.Embed(
+                description="We will review your partnership request shortly.",
+                color=discord.Color.green()
+            )
+            embed.set_image(url=BANNER_URL)
+            await interaction.followup.send(embed=embed)
+
+        else:  # something_else
+            embed = discord.Embed(
+                description="Staff will be with you shortly.",
+                color=discord.Color.blurple()
+            )
+            embed.set_image(url=BANNER_URL)
+            await interaction.followup.send(embed=embed)
+
+
 class TicketView(discord.ui.View):
 
     def __init__(self):
         super().__init__(timeout=None)
-
-    def lock(self):
-        for item in self.children:
-            item.disabled = True
-        return self
-
-    async def lock_and_update(self, interaction: discord.Interaction):
-        locked_ticket_channels.add(interaction.channel.id)
-
-        self.lock()
-
-        await interaction.message.edit(view=self)
-
-    @discord.ui.button(
-        label="Make a Deal",
-        style=discord.ButtonStyle.green
-    )
-    async def make_deal(
-        self,
-        interaction: discord.Interaction,
-        button: discord.ui.Button
-    ):
-
-        if interaction.channel.id in locked_ticket_channels:
-            return await interaction.response.send_message(
-                "Already locked.",
-                ephemeral=True
-            )
-
-        await self.lock_and_update(interaction)
-
-        embed = discord.Embed(
-            title="Make a Deal",
-            description="Are you a...",
-            color=discord.Color.green()
-        )
-
-        await interaction.channel.send(
-            embed=embed,
-            view=BuyerSellerView()
-        )
-        
-
-
-
-    async def on_error(self, interaction, error, item):
-    import traceback
-    traceback.print_exception(
-        type(error),
-        error,
-        error.__traceback__
-    )
-    
-    @discord.ui.button(label="Cancel a Deal", style=discord.ButtonStyle.red)
-    async def cancel_deal(self, interaction: discord.Interaction, button):
-
-        if interaction.channel.id in locked_ticket_channels:
-            return await interaction.response.send_message("Already locked.", ephemeral=True)
-
-        
-
-        await self.lock_and_update(interaction)
-
-        await interaction.followup.send(
-            embed=discord.Embed(
-                description="A staff member will help you shortly.",
-                color=discord.Color.blurple()
-            )
-        )
-
-
-    @discord.ui.button(label="Report a Scammer", style=discord.ButtonStyle.red)
-    async def report_scammer(self, interaction: discord.Interaction, button):
-
-        if interaction.channel.id in locked_ticket_channels:
-            return await interaction.response.send_message("Already locked.", ephemeral=True)
-
-        
-
-        await self.lock_and_update(interaction)
-
-        await interaction.followup.send(
-            embed=discord.Embed(
-                description="Please provide more info and screenshots.",
-                color=discord.Color.blurple()
-            )
-        )
-
-
-    @discord.ui.button(label="Report a Problem", style=discord.ButtonStyle.blurple)
-    async def report_problem(self, interaction: discord.Interaction, button):
-
-        if interaction.channel.id in locked_ticket_channels:
-            return await interaction.response.send_message("Already locked.", ephemeral=True)
-
-        
-
-        await self.lock_and_update(interaction)
-
-        await interaction.followup.send(
-            embed=discord.Embed(
-                description="Staff will assist you shortly.",
-                color=discord.Color.blurple()
-            )
-        )
-
-
-    @discord.ui.button(label="Make a Refund", style=discord.ButtonStyle.gray)
-    async def refund(self, interaction: discord.Interaction, button):
-
-        if interaction.channel.id in locked_ticket_channels:
-            return await interaction.response.send_message("Already locked.", ephemeral=True)
-
-        await interaction.response.defer()
-
-        await self.lock_and_update(interaction)
-
-        await interaction.followup.send(
-            embed=discord.Embed(
-                description="Provide all deal details for refund review.",
-                color=discord.Color.blurple()
-            )
-        )
-
-
-    @discord.ui.button(label="Partner With Us", style=discord.ButtonStyle.green)
-    async def partner(self, interaction: discord.Interaction, button):
-
-        if interaction.channel.id in locked_ticket_channels:
-            return await interaction.response.send_message("Already locked.", ephemeral=True)
-
-        await interaction.response.defer()
-
-        await self.lock_and_update(interaction)
-
-        await interaction.followup.send(
-            embed=discord.Embed(
-                description="We will review your partnership request.",
-                color=discord.Color.blurple()
-            )
-        )
-
-
-    @discord.ui.button(label="Something Else", style=discord.ButtonStyle.gray)
-    async def something_else(self, interaction: discord.Interaction, button):
-
-        if interaction.channel.id in locked_ticket_channels:
-            return await interaction.response.send_message("Already locked.", ephemeral=True)
-
-        await interaction.response.defer()
-
-        await self.lock_and_update(interaction)
-
-        await interaction.followup.send(
-            embed=discord.Embed(
-                description="Staff will be with you shortly.",
-                color=discord.Color.blurple()
-            )
-        )
+        self.add_item(TicketSelect())
 
 
 # -------------------------
-# REGISTER VIEW (FIXED)
+# REGISTER VIEW
 # -------------------------
 @bot.event
 async def on_ready():
-    bot.add_view(TicketView())
     await bot.tree.sync()
     print(f"Logged in as {bot.user}")
 
@@ -415,18 +347,17 @@ async def on_ready():
 # -------------------------
 @bot.event
 async def on_guild_channel_create(channel):
+    if isinstance(channel, discord.TextChannel) and channel.category and channel.category.id == TICKETS_CATEGORY_ID:
+        await asyncio.sleep(3)  # Wait 3 seconds before showing options
 
-    if isinstance(channel, discord.TextChannel):
+        embed = discord.Embed(
+            title="Welcome",
+            description="Thanks for choosing **eXXy Services**.\n\nHow can we assist you today?",
+            color=discord.Color.blurple()
+        )
+        embed.set_image(url=BANNER_URL)  # Banner at top
 
-        if channel.category and channel.category.id == TICKETS_CATEGORY_ID:
-
-            embed = discord.Embed(
-                title="Welcome",
-                description="Thanks for choosing **eXXy Services**.\n\nHow can we assist you today?",
-                color=discord.Color.blurple()
-            )
-
-            await channel.send(embed=embed, view=TicketView())
+        await channel.send(embed=embed, view=TicketView())
 
 
 # -------------------------
