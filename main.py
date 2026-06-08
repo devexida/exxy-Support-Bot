@@ -33,7 +33,7 @@ DEAL_LOGS_CHANNEL_ID = int(os.getenv("DEAL_LOGS_CHANNEL_ID"))
 TICKETS_CATEGORY_ID = int(os.getenv("TICKETS_CATEGORY_ID"))
 
 # Banner image URL (update this with your GitHub raw link)
-BANNER_URL = "https://github.com/devexida/exxy-Support-Bot/main/Banner.png" # ← CHANGE THIS
+BANNER_URL = "https://github.com/devexida/exxy-Support-Bot/blob/main/banner.png"
 
 
 # -------------------------
