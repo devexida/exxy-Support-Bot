@@ -33,10 +33,10 @@ DEAL_LOGS_CHANNEL_ID = int(os.getenv("DEAL_LOGS_CHANNEL_ID"))
 TICKETS_CATEGORY_ID = int(os.getenv("TICKETS_CATEGORY_ID"))
 
 # Banner image URL
-BANNER_URL = "https://imgur.com/gallery/exxy-H03NJKC#j6W1SUW"
+BANNER_URL = "https://drive.google.com/file/d/12_20fPDLF5FiyzWQUREXLIVQJj-i1Nl2/view?usp=drivesdk"
 
 # Replace with your pfp.png hosted link (GitHub raw, imgur, discord CDN, etc.)
-REVIEW_PFP_URL = "https://imgur.com/gallery/exxy1-tac3C31#aqrhUQr"  # ← CHANGE THIS
+REVIEW_PFP_URL = "https://drive.google.com/file/d/1bQE7wQEaUfzpSguZYVg2-KwrgyN0qw70/view?usp=drivesdk"  # ← CHANGE THIS
 
 
 # -------------------------
@@ -79,14 +79,14 @@ class ReviewView(discord.ui.View):
 class ReviewModal(discord.ui.Modal, title="Leave a Review"):
     service = discord.ui.TextInput(
         label="Service / Product",
-        placeholder="Youtube Service / Premium",
+        placeholder="Account Trade / Method / Boost / ...",
         required=True,
         style=discord.TextStyle.short
     )
     
     price = discord.ui.TextInput(
         label="Price",
-        placeholder="$15",
+        placeholder="5€ / 10€ / ...",
         required=True,
         style=discord.TextStyle.short
     )
