@@ -33,7 +33,7 @@ DEAL_LOGS_CHANNEL_ID = int(os.getenv("DEAL_LOGS_CHANNEL_ID"))
 TICKETS_CATEGORY_ID = int(os.getenv("TICKETS_CATEGORY_ID"))
 
 # Banner image URL
-BANNER_URL = "https://github.com/devexida/exxy-Support-Bot/main/banner.png"
+BANNER_URL = "https://imgur.com/gallery/exxy-H03NJKC"
 
 # Replace with your pfp.png hosted link (GitHub raw, imgur, discord CDN, etc.)
 REVIEW_PFP_URL = "https://your-hosted-link-to-pfp.png"  # ← CHANGE THIS
