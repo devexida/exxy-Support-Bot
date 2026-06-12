@@ -36,7 +36,7 @@ TICKETS_CATEGORY_ID = int(os.getenv("TICKETS_CATEGORY_ID"))
 BANNER_URL = "https://imgur.com/gallery/exxy-H03NJKC"
 
 # Replace with your pfp.png hosted link (GitHub raw, imgur, discord CDN, etc.)
-REVIEW_PFP_URL = "https://your-hosted-link-to-pfp.png"  # ← CHANGE THIS
+REVIEW_PFP_URL = "https://imgur.com/gallery/exxy1-tac3C31"  # ← CHANGE THIS
 
 
 # -------------------------
