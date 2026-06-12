@@ -33,10 +33,10 @@ DEAL_LOGS_CHANNEL_ID = int(os.getenv("DEAL_LOGS_CHANNEL_ID"))
 TICKETS_CATEGORY_ID = int(os.getenv("TICKETS_CATEGORY_ID"))
 
 # Banner image URL
-BANNER_URL = "https://imgur.com/gallery/exxy-H03NJKC"
+BANNER_URL = "https://imgur.com/gallery/exxy-H03NJKC#j6W1SUW"
 
 # Replace with your pfp.png hosted link (GitHub raw, imgur, discord CDN, etc.)
-REVIEW_PFP_URL = "https://imgur.com/gallery/exxy1-tac3C31"  # ← CHANGE THIS
+REVIEW_PFP_URL = "https://imgur.com/gallery/exxy1-tac3C31#aqrhUQr"  # ← CHANGE THIS
 
 
 # -------------------------
