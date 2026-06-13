@@ -80,14 +80,14 @@ class ReviewView(discord.ui.View):
 class ReviewModal(discord.ui.Modal, title="Leave a Review"):
     service = discord.ui.TextInput(
         label="Service / Product",
-        placeholder="Youtube Service / Premium",
+        placeholder="Account / Method / ...",
         required=True,
         style=discord.TextStyle.short
     )
     
     price = discord.ui.TextInput(
         label="Price",
-        placeholder="$15",
+        placeholder="10€ / 15€ / ...",
         required=True,
         style=discord.TextStyle.short
     )
