@@ -33,10 +33,10 @@ DEAL_LOGS_CHANNEL_ID = int(os.getenv("DEAL_LOGS_CHANNEL_ID"))
 TICKETS_CATEGORY_ID = int(os.getenv("TICKETS_CATEGORY_ID"))
 
 # Banner image URL (update this with your GitHub raw link)
-BANNER_URL = "https://github.com/devexida/exxy-Support-Bot/main/banner.png"
+BANNER_URL = "https://www.image2url.com/r2/default/images/1781382228106-55293dbe-dd0c-41e5-824c-aab90396febd.png"
 
 # Your profile picture for reviews (change this!)
-REVIEW_PFP_URL = "https://your-link-to-pfp.png"   # ← Put direct link here
+REVIEW_PFP_URL = "https://www.image2url.com/r2/default/images/1781382417163-9a2af436-d820-46b3-bc52-307b6866aae0.png"   # ← Put direct link here
 
 
 # -------------------------
