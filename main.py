@@ -28,6 +28,9 @@ def run_web():
 # -------------------------
 TOKEN = os.getenv("TOKEN")
 
+
+REVIEW_ROLE_ID_1 = 1513216049007562753   # Replace with actual Role ID
+REVIEW_ROLE_ID_2 = 1513215983870021784   # Replace with actual Role ID
 OWNER_ROLE_ID = int(os.getenv("OWNER_ROLE_ID"))
 DEAL_LOGS_CHANNEL_ID = int(os.getenv("DEAL_LOGS_CHANNEL_ID"))
 TICKETS_CATEGORY_ID = int(os.getenv("TICKETS_CATEGORY_ID"))
@@ -68,6 +71,16 @@ class ReviewButton(discord.ui.Button):
         super().__init__(label="Leave a Review", style=discord.ButtonStyle.blurple, emoji="⭐")
 
     async def callback(self, interaction: discord.Interaction):
+        # Check if user has one of the two allowed roles
+        user_role_ids = [role.id for role in interaction.user.roles]
+        
+        if not (REVIEW_ROLE_ID_1 in user_role_ids or REVIEW_ROLE_ID_2 in user_role_ids):
+            return await interaction.response.send_message(
+                "❌ You have to make a deal first before leaving a review.",
+                ephemeral=True
+            )
+
+        # If they have permission, open the modal
         await interaction.response.send_modal(ReviewModal())
 
 
@@ -80,14 +93,14 @@ class ReviewView(discord.ui.View):
 class ReviewModal(discord.ui.Modal, title="Leave a Review"):
     service = discord.ui.TextInput(
         label="Service / Product",
-        placeholder="Account / Method / ...",
+        placeholder="Youtube Service / Premium",
         required=True,
         style=discord.TextStyle.short
     )
     
     price = discord.ui.TextInput(
         label="Price",
-        placeholder="10€ / 15€ / ...",
+        placeholder="$15",
         required=True,
         style=discord.TextStyle.short
     )
@@ -122,7 +135,7 @@ class ReviewModal(discord.ui.Modal, title="Leave a Review"):
             color=discord.Color.blurple()
         )
 
-        if REVIEW_PFP_URL:
+        if REVIEW_PFP_URL:  # Make sure this variable exists
             embed.set_thumbnail(url=REVIEW_PFP_URL)
 
         embed.add_field(name="Service Details", value=f"**{self.service.value}**", inline=False)
@@ -132,7 +145,6 @@ class ReviewModal(discord.ui.Modal, title="Leave a Review"):
 
         embed.set_footer(text=f"Reviewed by {interaction.user} • {discord.utils.format_dt(discord.utils.utcnow())}")
 
-        # Send review with button again
         view = ReviewView()
         await interaction.channel.send(embed=embed, view=view)
 
