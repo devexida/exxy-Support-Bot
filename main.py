@@ -394,17 +394,17 @@ class TicketSelect(discord.ui.Select):
             await interaction.followup.send(embed=embed)
 
         elif value == "report_problem":
-            embed = discord.Embed(description="Staff will assist you shortly with your issue.", color=discord.Color.blurple())
+            embed = discord.Embed(description="Staff will assist you shortly with your issue. \nPlease describe your problem as detailed as possible", color=discord.Color.blurple())
             embed.set_image(url=BANNER_URL)
             await interaction.followup.send(embed=embed)
 
         elif value == "refund":
-            embed = discord.Embed(description="Provide all deal details for refund review.", color=discord.Color.blurple())
+            embed = discord.Embed(description="Provide all deal details for refund review. Note: Refunds are not guaranteed", color=discord.Color.blurple())
             embed.set_image(url=BANNER_URL)
             await interaction.followup.send(embed=embed)
 
         elif value == "partner":
-            embed = discord.Embed(description="We will review your partnership request shortly.", color=discord.Color.green())
+            embed = discord.Embed(description="We will review your partnership request shortly. Please provide a social media link for us to check out", color=discord.Color.green())
             embed.set_image(url=BANNER_URL)
             await interaction.followup.send(embed=embed)
 
